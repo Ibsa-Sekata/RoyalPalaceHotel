@@ -1,7 +1,7 @@
-﻿import React from "react";
+import React from "react";
 import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
 import { LayoutDashboard, CalendarDays, BedDouble, Users, ArrowLeftRight, Sparkles, CreditCard, ChartNoAxesCombined, Settings, UserRound, Crown, Search, Bell, Mail, LogOut, CircleUserRound } from "lucide-react";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth } from "../context/useAuth.js";
 
 const nav = [
   ["Dashboard","/admin",LayoutDashboard],
@@ -51,10 +51,10 @@ export default function AdminLayout() {
           ))}
         </nav>
         <div className="sidebar-help">
-          <span className="help-icon">✦</span>
+          <span className="help-icon">Ã¢Å“Â¦</span>
           <b>Need assistance?</b>
           <small>Contact hotel support</small>
-          <Link to="/contact">Get help →</Link>
+          <Link to="/contact">Get help Ã¢â€ â€™</Link>
         </div>
         <button
           onClick={handleLogout}
@@ -75,7 +75,7 @@ export default function AdminLayout() {
         >
           <LogOut size={14}/> Sign out
         </button>
-        <Link className="back-site" to="/">← View hotel website</Link>
+        <Link className="back-site" to="/">Ã¢â€ Â View hotel website</Link>
       </aside>
 
       <section className="admin-main">
