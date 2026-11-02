@@ -80,13 +80,13 @@ export default function MyBookings() {
 
       {flash && (
         <div style={{ background: "#e9f6ed", color: "#39845a", padding: "12px 16px", borderRadius: 8, marginBottom: 16, fontSize: 12 }}>
-          Ã¢Å“â€¦ {flash}
+          ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ {flash}
         </div>
       )}
 
       {error && (
         <div style={{ background: "#fdecec", color: "#c05d5d", padding: "12px 16px", borderRadius: 8, marginBottom: 16, fontSize: 12 }}>
-          Ã¢ÂÅ’ {error}
+          ÃƒÂ¢Ã‚ÂÃ…â€™ {error}
         </div>
       )}
 
@@ -100,7 +100,7 @@ export default function MyBookings() {
       </div>
 
       {loading ? (
-        <p style={{ textAlign: "center", padding: 60, color: "#8892a0" }}>Loading your bookingsÃ¢â‚¬Â¦</p>
+        <p style={{ textAlign: "center", padding: 60, color: "#8892a0" }}>Loading your bookingsÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</p>
       ) : bookings.length === 0 ? (
         <div style={{
           background: "#fff", border: "1px solid #eef0f3", borderRadius: 14,
@@ -128,6 +128,10 @@ export default function MyBookings() {
                   <h3 style={{ fontSize: 18, fontFamily: "'Playfair Display', serif", margin: "4px 0 0", color: "#20242a" }}>
                     {b.room?.name}
                   </h3>
+                  <div style={{ fontSize: 11, color: "#8892a0", marginTop: 4 }}>
+                    Reserved by <b style={{ color: "#555b64" }}>{b.guest?.fullName || user?.fullName}</b>
+                    {b.guest?.phone && <> · {b.guest.phone}</>}
+                  </div>
                 </div>
                 {statusBadge(b.status)}
               </div>
@@ -183,7 +187,7 @@ export default function MyBookings() {
                     onClick={() => cancelBooking(b.id)}
                     style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#c05d5d" }}
                   >
-                    <X size={13}/> {busy === b.id ? "CancellingÃ¢â‚¬Â¦" : "Cancel booking"}
+                    <X size={13}/> {busy === b.id ? "CancellingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦" : "Cancel booking"}
                   </button>
                 )}
               </div>

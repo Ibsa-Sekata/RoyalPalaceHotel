@@ -17,4 +17,8 @@ export const authController = {
     const data = await authService.updateProfile(req.user.id, req.body);
     res.json({ success: true, data, message: "Profile updated" });
   },
+  async changePassword(req, res) {
+    const data = await authService.changePassword(req.user.id, req.body);
+    res.json({ success: true, data, message: "Password updated" });
+  },
 };

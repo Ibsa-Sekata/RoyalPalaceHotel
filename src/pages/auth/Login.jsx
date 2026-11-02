@@ -7,7 +7,6 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -19,11 +18,10 @@ export default function Login() {
     try {
       const user = await login(email, password);
       const from = location.state?.from;
-
       if (user.role === "ADMIN") {
         navigate(from && from.startsWith("/admin") ? from : "/admin");
       } else if (user.role === "GUEST") {
-        navigate(from && (from.startsWith("/my-") || from === "/booking") ? from : "/my-bookings");
+        navigate(from && (from.startsWith("/my-") || from.startsWith("/booking")) ? from : "/my-bookings");
       } else {
         navigate("/");
       }
@@ -50,29 +48,26 @@ export default function Login() {
         <Crown className="auth-crown" />
         <span className="eyebrow">SIGN IN</span>
         <h1>Welcome back</h1>
-        <p>Sign in to your account.</p>
-
-        <label>
-          Email address
+        <p>Sign in to continue.</p>
+        <label>Email address
           <input type="email" required placeholder="you@example.com"
             value={email} onChange={(e) => setEmail(e.target.value)} />
         </label>
-        <label>
-          Password
+        <label>Password
           <div className="password-wrap">
             <input type="password" required placeholder="Enter your password"
               value={password} onChange={(e) => setPassword(e.target.value)} />
             <Eye size={16} />
           </div>
         </label>
-
         {error && <small style={{ color: "#c05d5d" }}>{error}</small>}
-
         <button className="btn btn-gold full-width" disabled={loading}>
-          {loading ? "Signing inÃ¢â‚¬Â¦" : "Sign in"}
+          {loading ? "Signing in..." : "Sign in"}
         </button>
-
-        <Link className="text-link" to="/">Ã¢â€ Â Return to hotel website</Link>
+        <p className="form-note">
+          Don't have an account? <Link to="/register">Create one</Link>
+        </p>
+        <Link className="text-link" to="/">Return to hotel website</Link>
       </form>
     </section>
   );

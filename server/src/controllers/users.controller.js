@@ -21,4 +21,13 @@ export const usersController = {
     await usersService.remove(req.params.id);
     res.status(204).send();
   },
+  async count(_req, res) {
+    const count = await usersService.countAdmins();
+    res.json({ success: true, data: { admins: count, canBootstrap: count === 0, canAddAdmin: count < 2 } });
+  },
+
+  async bootstrap(req, res) {
+    const data = await usersService.bootstrapFirstAdmin(req.body);
+    res.status(201).json({ success: true, data, message: "First admin created" });
+  },
 };

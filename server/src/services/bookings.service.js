@@ -24,7 +24,12 @@ export const bookingsService = {
     return b;
   },
 
-  async create({ checkIn, checkOut, roomId, guests, fullName, email, phone, specialRequests, userId: userIdParam }) {
+  async create({ checkIn, checkOut, roomId, guests, specialRequests, userId: userIdParam }) {
+    if (!userIdParam) throw ApiError.unauthorized("Login required to book");
+
+    const user = await prisma.user.findUnique({ where: { id: Number(userIdParam) } });
+    if (!user) throw ApiError.unauthorized("User not found");
+
     const ci = new Date(checkIn); const co = new Date(checkOut);
     if (isNaN(ci) || isNaN(co)) throw ApiError.badRequest("Invalid dates");
     if (co <= ci) throw ApiError.badRequest("Check-out must be after check-in");
@@ -35,27 +40,47 @@ export const bookingsService = {
     if (room.status === "OUT_OF_SERVICE") throw ApiError.conflict("Room is out of service");
 
     const overlap = await prisma.booking.findFirst({
-      where: { roomId: Number(roomId), status: { in: ["PENDING","CONFIRMED","CHECKED_IN"] }, checkIn: { lt: co }, checkOut: { gt: ci } },
+      where: {
+        roomId: Number(roomId),
+        status: { in: ["PENDING", "CONFIRMED", "CHECKED_IN"] },
+        checkIn: { lt: co }, checkOut: { gt: ci },
+      },
     });
     if (overlap) throw ApiError.conflict("Room is not available for these dates");
 
-    let guest = email ? await prisma.guest.findFirst({ where: { email } }) : null;
+    let guest = await prisma.guest.findFirst({ where: { userId: user.id } });
+    if (!guest) guest = await prisma.guest.findFirst({ where: { email: user.email } });
     if (!guest) {
       guest = await prisma.guest.create({
-        data: { fullName: fullName || "Walk-in Guest", email: email || null, phone: phone || null },
+        data: {
+          fullName: user.fullName,
+          email: user.email,
+          phone: user.phone || null,
+          userId: user.id,
+        },
       });
-    }
-
-    const userId = userIdParam ? Number(userIdParam) : null;
-    if (userId && guest && !guest.userId) {
-      await prisma.guest.update({ where: { id: guest.id }, data: { userId } }).catch(() => {});
+    } else if (!guest.userId) {
+      await prisma.guest.update({ where: { id: guest.id }, data: { userId: user.id } }).catch(() => {});
     }
 
     const { subtotal, tax, totalAmount } = calculateTotals(room.pricePerNight, ci, co);
     const bookingNumber = await generateBookingNumber();
 
     return prisma.booking.create({
-      data: { bookingNumber, guestId: guest.id, roomId: room.id, userId, checkIn: ci, checkOut: co, guests: Number(guests), specialRequests, status: "PENDING", subtotal, tax, totalAmount },
+      data: {
+        bookingNumber,
+        guestId: guest.id,
+        roomId: room.id,
+        userId: user.id,
+        checkIn: ci,
+        checkOut: co,
+        guests: Number(guests),
+        specialRequests,
+        status: "PENDING",
+        subtotal,
+        tax,
+        totalAmount,
+      },
       include: { guest: true, room: true },
     });
   },

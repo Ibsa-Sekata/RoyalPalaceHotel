@@ -80,11 +80,27 @@ export const authService = {
     return safeUser(user);
   },
 
-  async updateProfile(id, { fullName, phone }) {
+  async updateProfile(id, { fullName, phone, email }) {
     const patch = {};
     if (fullName) patch.fullName = fullName;
     if (phone !== undefined) patch.phone = phone;
+    if (email) {
+      const existing = await prisma.user.findUnique({ where: { email } });
+      if (existing && existing.id !== Number(id))
+        throw ApiError.conflict("Email already in use");
+      patch.email = email;
+    }
     const u = await prisma.user.update({ where: { id: Number(id) }, data: patch });
     return safeUser(u);
+  },
+
+  async changePassword(id, { currentPassword, newPassword }) {
+    const u = await prisma.user.findUnique({ where: { id: Number(id) } });
+    if (!u) throw ApiError.notFound("User not found");
+    const ok = await bcrypt.compare(currentPassword, u.passwordHash);
+    if (!ok) throw ApiError.unauthorized("Current password is incorrect");
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({ where: { id: Number(id) }, data: { passwordHash } });
+    return { success: true };
   },
 };

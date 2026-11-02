@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Users, BedDouble, Ruler, Wifi, Coffee, ArrowLeft } from "lucide-react";
 import { roomsApi } from "../../api/roomsApi.js";
@@ -55,7 +55,7 @@ export default function RoomDetails() {
         </ul>
         <div className="availability-box">
           <b>Check availability</b>
-          <Link className="btn btn-gold full-width" to="/booking">Book this room</Link>
+          <Link className="btn btn-gold full-width" to={`/booking?roomId=${room.id}`}>Book this room</Link>
         </div>
       </aside>
     </section>

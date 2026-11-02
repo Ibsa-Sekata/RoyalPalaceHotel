@@ -5,8 +5,13 @@ import { authenticate } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/role.middleware.js";
 
 const router = Router();
-router.use(authenticate, requireRole("ADMIN"));
 
+// PUBLIC: check admin count + bootstrap first admin (only if 0 admins exist)
+router.get("/count", asyncHandler(usersController.count));
+router.post("/bootstrap", asyncHandler(usersController.bootstrap));
+
+// ADMIN-only routes
+router.use(authenticate, requireRole("ADMIN"));
 router.get("/", asyncHandler(usersController.list));
 router.get("/:id", asyncHandler(usersController.getById));
 router.post("/", asyncHandler(usersController.create));

@@ -57,4 +57,52 @@ export const usersService = {
     await this.getById(id);
     await prisma.user.delete({ where: { id: Number(id) } });
   },
+  async countAdmins() {
+    return prisma.user.count({ where: { role: "ADMIN", status: { not: "SUSPENDED" } } });
+  },
+
+  async createAdmin({ fullName, email, password, phone }) {
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) throw ApiError.conflict("Email already registered");
+
+    const adminCount = await this.countAdmins();
+    if (adminCount >= 2) {
+      throw ApiError.forbidden("Maximum of 2 admin accounts allowed");
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const u = await prisma.user.create({
+      data: {
+        fullName,
+        email,
+        phone: phone || null,
+        passwordHash,
+        role: "ADMIN",
+        status: "ACTIVE",
+      },
+    });
+    return safe(u);
+  },
+
+  async bootstrapFirstAdmin({ fullName, email, password, phone }) {
+    const count = await this.countAdmins();
+    if (count > 0) {
+      throw ApiError.forbidden("An admin already exists. Please log in.");
+    }
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) throw ApiError.conflict("Email already registered");
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const u = await prisma.user.create({
+      data: {
+        fullName,
+        email,
+        phone: phone || null,
+        passwordHash,
+        role: "ADMIN",
+        status: "ACTIVE",
+      },
+    });
+    return safe(u);
+  },
 };
