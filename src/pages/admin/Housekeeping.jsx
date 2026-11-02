@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
-import { Sparkles, CheckCircle2, Clock3, Wrench } from "lucide-react";
+import { Sparkles, CheckCircle2, Clock3, Wrench, Trash2 } from "lucide-react";
 import AdminPageHeader from "../../components/AdminPageHeader.jsx";
 import { housekeepingApi } from "../../api/housekeepingApi.js";
 import { roomsApi } from "../../api/roomsApi.js";
@@ -38,6 +38,10 @@ export default function Housekeeping() {
       setNewTask({ roomId: "", taskType: "CLEANING", description: "", priority: "NORMAL" });
       await load();
     } catch (e) { alert(e.message); }
+  };
+  const remove = async (id) => {
+    if (!window.confirm("Delete this housekeeping task?")) return;
+    try { await housekeepingApi.remove(id); await load(); } catch (e) { alert(e.message); }
   };
 
   const pending = tasks.filter(t => t.status === "PENDING").length;
@@ -97,6 +101,7 @@ export default function Housekeeping() {
                       {t.status === "IN_PROGRESS" && (
                         <button className="btn btn-small btn-light" disabled={busy===t.id} onClick={() => act(t.id, housekeepingApi.complete)}>Complete</button>
                       )}
+                      <button className="btn btn-small btn-light" disabled={busy===t.id} onClick={() => remove(t.id)}><Trash2 size={13}/> Delete</button>
                     </td>
                   </tr>
                 ))}

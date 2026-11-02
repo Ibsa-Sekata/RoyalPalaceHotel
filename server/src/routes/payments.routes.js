@@ -11,6 +11,7 @@ router.get("/", asyncHandler(paymentsController.list));
 router.get("/:id", asyncHandler(paymentsController.getById));
 router.post("/", asyncHandler(paymentsController.create));
 router.patch("/:id", asyncHandler(paymentsController.update));
+router.delete("/:id", asyncHandler(paymentsController.remove));
 router.get("/:id/invoice", asyncHandler(paymentsController.invoice));
 
 export default router;

@@ -54,6 +54,11 @@ export const paymentsService = {
         return prisma.payment.update({ where: { id: Number(id) }, data });
     },
 
+    async remove(id) {
+        await this.getById(id);
+        await prisma.payment.delete({ where: { id: Number(id) } });
+    },
+
     async invoice(id) {
         const p = await this.getById(id);
         const html = `

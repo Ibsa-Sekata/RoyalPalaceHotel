@@ -13,5 +13,6 @@ router.post("/tasks", asyncHandler(housekeepingController.create));
 router.patch("/tasks/:id", asyncHandler(housekeepingController.update));
 router.post("/tasks/:id/start", asyncHandler(housekeepingController.start));
 router.post("/tasks/:id/complete", asyncHandler(housekeepingController.complete));
+router.delete("/tasks/:id", asyncHandler(housekeepingController.remove));
 
 export default router;

@@ -14,6 +14,10 @@ export const paymentsController = {
     async update(req, res) {
         res.json({ success: true, data: await paymentsService.update(req.params.id, req.body) });
     },
+    async remove(req, res) {
+        await paymentsService.remove(req.params.id);
+        res.status(204).send();
+    },
     async invoice(req, res) {
         const html = await paymentsService.invoice(req.params.id);
         res.type("text/html").send(html);

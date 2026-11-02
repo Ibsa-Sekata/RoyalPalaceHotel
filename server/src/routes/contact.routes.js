@@ -8,4 +8,5 @@ router.post("/messages", asyncHandler(contactController.create));
 router.use(authenticate, requireRole("ADMIN"));
 router.get("/messages", asyncHandler(contactController.list));
 router.patch("/messages/:id/status", asyncHandler(contactController.updateStatus));
+router.post("/messages/:id/reply", asyncHandler(contactController.reply));
 export default router;

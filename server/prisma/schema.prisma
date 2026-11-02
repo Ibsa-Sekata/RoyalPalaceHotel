@@ -120,6 +120,7 @@ model ContactMessage {
   email     String
   subject   String
   message   String
+  reply     String?
   status    ContactStatus @default(NEW)
   userId    Int?
   user      User?         @relation(fields: [userId], references: [id], onDelete: SetNull)

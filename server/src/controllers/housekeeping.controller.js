@@ -20,4 +20,8 @@ export const housekeepingController = {
     async complete(req, res) {
         res.json({ success: true, data: await housekeepingService.complete(req.params.id) });
     },
+    async remove(req, res) {
+        await housekeepingService.remove(req.params.id);
+        res.status(204).send();
+    },
 };

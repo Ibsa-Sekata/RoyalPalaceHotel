@@ -1,6 +1,7 @@
 ﻿import React, { useEffect, useState } from "react";
 import AdminPageHeader from "../../components/AdminPageHeader.jsx";
 import { bookingsApi } from "../../api/bookingsApi.js";
+import { Trash2 } from "lucide-react";
 
 export default function CheckInOut() {
   const [rows, setRows] = useState([]);
@@ -30,6 +31,13 @@ export default function CheckInOut() {
       else if (b.status === "CHECKED_IN") await bookingsApi.checkOut(b.id);
       await load();
     } catch (e) { alert(e.message); }
+    finally { setBusy(null); }
+  };
+  const remove = async (id) => {
+    if (!window.confirm("Delete this booking permanently?")) return;
+    setBusy(id);
+    try { await bookingsApi.remove(id); await load(); }
+    catch (e) { alert(e.message); }
     finally { setBusy(null); }
   };
 
@@ -73,6 +81,7 @@ export default function CheckInOut() {
                           {busy===b.id ? "…" : "Check out"}
                         </button>
                       )}
+                      <button className="btn btn-small btn-light" disabled={busy===b.id} onClick={() => remove(b.id)}><Trash2 size={13}/> Delete</button>
                     </td>
                   </tr>
                 ))}

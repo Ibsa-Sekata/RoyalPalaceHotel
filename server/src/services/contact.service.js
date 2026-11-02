@@ -18,4 +18,14 @@ export const contactService = {
     if (!m) throw ApiError.notFound("Message not found");
     return prisma.contactMessage.update({ where: { id: Number(id) }, data: { status, repliedAt: status === "RESOLVED" ? new Date() : m.repliedAt } });
   },
+  async reply(id, reply) {
+    const text = String(reply || "").trim();
+    if (!text) throw ApiError.badRequest("Reply is required");
+    const m = await prisma.contactMessage.findUnique({ where: { id: Number(id) } });
+    if (!m) throw ApiError.notFound("Message not found");
+    return prisma.contactMessage.update({
+      where: { id: Number(id) },
+      data: { reply: text, status: "RESOLVED", repliedAt: new Date() },
+    });
+  },
 };

@@ -39,6 +39,11 @@ export const housekeepingService = {
         return prisma.housekeepingTask.update({ where: { id: Number(id) }, data });
     },
 
+    async remove(id) {
+        await this.getById(id);
+        await prisma.housekeepingTask.delete({ where: { id: Number(id) } });
+    },
+
     async start(id) {
         return prisma.housekeepingTask.update({
             where: { id: Number(id) },

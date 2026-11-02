@@ -162,6 +162,55 @@
     padding: 7px 10px;
     font-size: 11px;
   }
+  .panel-form {
+    display: grid;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+  }
+  .form-grid label,
+  .panel-form label {
+    display: grid;
+    gap: 5px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .panel-form input,
+  .panel-form select,
+  .panel-form textarea,
+  .inline-reply textarea {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 9px 10px;
+    background: #fff;
+    color: var(--ink);
+    min-width: 0;
+  }
+  .panel-form textarea,
+  .inline-reply textarea {
+    min-height: 42px;
+    resize: vertical;
+  }
+  .row-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .inline-reply {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .inline-reply textarea {
+    flex: 1;
+    min-height: 70px;
+  }
   .full-width {
     width: 100%;
   }

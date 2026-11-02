@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
-import { Download, Plus, RotateCw } from "lucide-react";
+import { Download, Plus, RotateCw, Trash2 } from "lucide-react";
 import AdminPageHeader from "../../components/AdminPageHeader.jsx";
 import { paymentsApi } from "../../api/paymentsApi.js";
 import { bookingsApi } from "../../api/bookingsApi.js";
@@ -50,6 +50,10 @@ export default function Payments() {
         w.document.close();
       })
       .catch(e => alert(e.message));
+  };
+  const remove = async (id) => {
+    if (!window.confirm("Delete this payment record permanently?")) return;
+    try { await paymentsApi.remove(id); await load(); } catch (e) { alert(e.message); }
   };
 
   return (
@@ -108,7 +112,7 @@ export default function Payments() {
                     <td>{p.method}</td>
                     <td><span className={`status status-${p.status.toLowerCase()}`}>{p.status}</span></td>
                     <td>{new Date(p.createdAt).toLocaleDateString()}</td>
-                    <td><button className="btn btn-small btn-light" onClick={() => viewInvoice(p.id)}><Download size={13}/> Invoice</button></td>
+                    <td><button className="btn btn-small btn-light" onClick={() => viewInvoice(p.id)}><Download size={13}/> Invoice</button>{" "}<button className="btn btn-small btn-light" onClick={() => remove(p.id)}><Trash2 size={13}/> Delete</button></td>
                   </tr>
                 ))}
             </tbody>

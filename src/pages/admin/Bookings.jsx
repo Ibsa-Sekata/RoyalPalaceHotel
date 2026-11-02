@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
-import { Plus, Search, Download, RotateCw } from "lucide-react";
+import { Search, Download, RotateCw, Trash2 } from "lucide-react";
 import AdminPageHeader from "../../components/AdminPageHeader.jsx";
 import { bookingsApi } from "../../api/bookingsApi.js";
 
@@ -112,6 +112,10 @@ export default function Bookings() {
                       <button className="btn btn-small btn-light" disabled={busy===b.id}
                               onClick={() => action(b.id, bookingsApi.checkOut)}>Check out</button>
                     )}
+                    <button className="btn btn-small btn-light" disabled={busy===b.id}
+                            onClick={() => window.confirm("Delete this booking permanently?") && action(b.id, bookingsApi.remove)}>
+                      <Trash2 size={13}/> Delete
+                    </button>
                   </td>
                 </tr>
               ))}
