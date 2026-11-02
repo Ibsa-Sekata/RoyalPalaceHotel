@@ -1,10 +1,10 @@
-﻿import { Router } from "express";
+import { Router } from "express";
 import { settingsController } from "../controllers/settings.controller.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/role.middleware.js";
 const router = Router();
 router.get("/", asyncHandler(settingsController.list));
-router.use(authenticate, requireRole("ADMIN", "MANAGER"));
+router.use(authenticate, requireRole("ADMIN"));
 router.patch("/:key", asyncHandler(settingsController.update));
 export default router;

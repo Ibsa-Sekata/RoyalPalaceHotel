@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  fullName     String
+  email        String     @unique
+  passwordHash String
+  role         Role       @default(RECEPTIONIST)
+  status       UserStatus @default(ACTIVE)
+  lastLoginAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Guest {
+  id          Int       @id @default(autoincrement())
+  fullName    String
+  email       String?
+  phone       String?
+  nationality String?
+  guestType   GuestType @default(NEW)
+  notes       String?
+  bookings    Booking[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Room {
+  id            Int                @id @default(autoincrement())
+  roomNumber    String             @unique
+  name          String
+  type          String
+  pricePerNight Decimal            @db.Decimal(10, 2)
+  maxGuests     Int
+  beds          String
+  size          String
+  image         String
+  description   String?
+  status        RoomStatus         @default(AVAILABLE)
+  bookings      Booking[]
+  tasks         HousekeepingTask[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+}
+
+model Booking {
+  id              Int           @id @default(autoincrement())
+  bookingNumber   String        @unique
+  guestId         Int
+  guest           Guest         @relation(fields: [guestId], references: [id])
+  roomId          Int
+  room            Room          @relation(fields: [roomId], references: [id])
+  checkIn         DateTime
+  checkOut        DateTime
+  guests          Int
+  specialRequests String?
+  status          BookingStatus @default(PENDING)
+  subtotal        Decimal       @db.Decimal(10, 2)
+  tax             Decimal       @db.Decimal(10, 2)
+  totalAmount     Decimal       @db.Decimal(10, 2)
+  payments        Payment[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  cancelledAt     DateTime?
+}
+
+model Payment {
+  id                   Int           @id @default(autoincrement())
+  invoiceNumber        String        @unique
+  bookingId            Int
+  booking              Booking       @relation(fields: [bookingId], references: [id])
+  amount               Decimal       @db.Decimal(10, 2)
+  currency             String        @default("ETB")
+  method               PaymentMethod @default(CASH)
+  status               PaymentStatus @default(UNPAID)
+  transactionReference String?
+  paidAt               DateTime?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+}
+
+model HousekeepingTask {
+  id          Int        @id @default(autoincrement())
+  roomId      Int
+  room        Room       @relation(fields: [roomId], references: [id])
+  assignedTo  String?
+  taskType    String
+  description String?
+  status      TaskStatus @default(PENDING)
+  priority    String     @default("NORMAL")
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model ContactMessage {
+  id        Int           @id @default(autoincrement())
+  fullName  String
+  email     String
+  subject   String
+  message   String
+  status    ContactStatus @default(NEW)
+  createdAt DateTime      @default(now())
+  repliedAt DateTime?
+}
+
+model HotelSetting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  RECEPTIONIST
+  HOUSEKEEPING
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum GuestType {
+  NEW
+  RETURNING
+  VIP
+}
+
+enum RoomStatus {
+  AVAILABLE
+  BOOKED
+  CLEANING
+  MAINTENANCE
+  OUT_OF_SERVICE
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+  NO_SHOW
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  MOBILE_MONEY
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
+  REFUNDED
+  FAILED
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  MAINTENANCE
+}
+
+enum ContactStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  SPAM
+}

@@ -12,8 +12,8 @@ router.get("/availability", asyncHandler(roomsController.availability));
 router.get("/:id", asyncHandler(roomsController.getById));
 
 // Admin only
-router.post("/", authenticate, requireRole("ADMIN", "MANAGER"), asyncHandler(roomsController.create));
-router.patch("/:id", authenticate, requireRole("ADMIN", "MANAGER"), asyncHandler(roomsController.update));
+router.post("/", authenticate, requireRole("ADMIN"), asyncHandler(roomsController.create));
+router.patch("/:id", authenticate, requireRole("ADMIN"), asyncHandler(roomsController.update));
 router.delete("/:id", authenticate, requireRole("ADMIN"), asyncHandler(roomsController.remove));
 
 export default router;

@@ -5,7 +5,7 @@ import { authenticate } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/role.middleware.js";
 
 const router = Router();
-router.use(authenticate, requireRole("ADMIN", "MANAGER", "HOUSEKEEPING"));
+router.use(authenticate, requireRole("ADMIN"));
 
 router.get("/tasks", asyncHandler(housekeepingController.list));
 router.get("/tasks/:id", asyncHandler(housekeepingController.getById));

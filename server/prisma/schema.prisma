@@ -8,25 +8,31 @@ datasource db {
 }
 
 model User {
-  id           Int        @id @default(autoincrement())
-  fullName     String
-  email        String     @unique
-  passwordHash String
-  role         Role       @default(RECEPTIONIST)
-  status       UserStatus @default(ACTIVE)
-  lastLoginAt  DateTime?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id              Int              @id @default(autoincrement())
+  fullName        String
+  email           String           @unique
+  passwordHash    String
+  phone           String?
+  role            Role             @default(GUEST)
+  status          UserStatus       @default(ACTIVE)
+  lastLoginAt     DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  guestProfile    Guest?           @relation("UserGuest")
+  bookings        Booking[]        @relation("UserBookings")
+  contactMessages ContactMessage[]
 }
 
 model Guest {
   id          Int       @id @default(autoincrement())
   fullName    String
-  email       String?
+  email       String?   @unique
   phone       String?
   nationality String?
   guestType   GuestType @default(NEW)
   notes       String?
+  userId      Int?      @unique
+  user        User?     @relation("UserGuest", fields: [userId], references: [id], onDelete: SetNull)
   bookings    Booking[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -57,6 +63,8 @@ model Booking {
   guest           Guest         @relation(fields: [guestId], references: [id])
   roomId          Int
   room            Room          @relation(fields: [roomId], references: [id])
+  userId          Int?
+  user            User?         @relation("UserBookings", fields: [userId], references: [id], onDelete: SetNull)
   checkIn         DateTime
   checkOut        DateTime
   guests          Int
@@ -69,6 +77,11 @@ model Booking {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   cancelledAt     DateTime?
+
+  @@index([userId])
+  @@index([guestId])
+  @@index([roomId])
+  @@index([checkIn, checkOut])
 }
 
 model Payment {
@@ -108,6 +121,8 @@ model ContactMessage {
   subject   String
   message   String
   status    ContactStatus @default(NEW)
+  userId    Int?
+  user      User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
   createdAt DateTime      @default(now())
   repliedAt DateTime?
 }
@@ -120,11 +135,22 @@ model HotelSetting {
   updatedAt   DateTime @updatedAt
 }
 
+model AdminLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  action     String
+  entityType String
+  entityId   Int?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId])
+}
+
 enum Role {
   ADMIN
-  MANAGER
-  RECEPTIONIST
-  HOUSEKEEPING
+  GUEST
 }
 
 enum UserStatus {

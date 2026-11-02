@@ -1,11 +1,11 @@
-﻿import { Router } from "express";
+import { Router } from "express";
 import { contactController } from "../controllers/contact.controller.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/role.middleware.js";
 const router = Router();
 router.post("/messages", asyncHandler(contactController.create));
-router.use(authenticate, requireRole("ADMIN", "MANAGER", "RECEPTIONIST"));
+router.use(authenticate, requireRole("ADMIN"));
 router.get("/messages", asyncHandler(contactController.list));
 router.patch("/messages/:id/status", asyncHandler(contactController.updateStatus));
 export default router;

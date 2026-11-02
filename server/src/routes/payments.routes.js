@@ -5,7 +5,7 @@ import { authenticate } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/role.middleware.js";
 
 const router = Router();
-router.use(authenticate, requireRole("ADMIN", "MANAGER", "RECEPTIONIST"));
+router.use(authenticate, requireRole("ADMIN"));
 
 router.get("/", asyncHandler(paymentsController.list));
 router.get("/:id", asyncHandler(paymentsController.getById));
