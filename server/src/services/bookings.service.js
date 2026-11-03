@@ -33,6 +33,8 @@ export const bookingsService = {
     const ci = new Date(checkIn); const co = new Date(checkOut);
     if (isNaN(ci) || isNaN(co)) throw ApiError.badRequest("Invalid dates");
     if (co <= ci) throw ApiError.badRequest("Check-out must be after check-in");
+    if (!Number.isInteger(Number(guests)) || Number(guests) < 1)
+      throw ApiError.badRequest("At least one guest is required");
 
     const room = await prisma.room.findUnique({ where: { id: Number(roomId) } });
     if (!room) throw ApiError.notFound("Room not found");

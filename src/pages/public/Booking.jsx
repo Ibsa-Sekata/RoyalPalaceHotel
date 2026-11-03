@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import SectionHeading from "../../components/SectionHeading.jsx";
 import { roomsApi } from "../../api/roomsApi.js";
 import { bookingsApi } from "../../api/bookingsApi.js";
+import { myBookingsApi } from "../../api/myBookingsApi.js";
 import { useAuth } from "../../context/useAuth.js";
 import { Lock, User, Mail, Phone } from "lucide-react";
 
@@ -15,11 +16,14 @@ export default function Booking() {
     checkIn: "",
     checkOut: "",
     roomId: params.get("roomId") || "",
-    guests: "2",
+    guests: params.get("guests") || "2",
     specialRequests: "",
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
+  const [payment, setPayment] = useState({ file: null, method: "BANK_TRANSFER", amount: "" });
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -33,12 +37,23 @@ export default function Booking() {
     }
   }, [user, navigate, params]);
 
+  useEffect(() => {
+    setForm((current) => ({
+      ...current,
+      checkIn: params.get("checkIn") || current.checkIn,
+      checkOut: params.get("checkOut") || current.checkOut,
+    }));
+  }, [params]);
+
   const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(""); setSuccess(null); setLoading(true);
     try {
+      if (new Date(form.checkOut) <= new Date(form.checkIn)) {
+        throw new Error("Check-out must be after check-in.");
+      }
       const res = await bookingsApi.create({
         checkIn: form.checkIn,
         checkOut: form.checkOut,
@@ -51,6 +66,32 @@ export default function Booking() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const submitPayment = async (event) => {
+    event.preventDefault();
+    if (!payment.file) {
+      setError("Choose a payment receipt first.");
+      return;
+    }
+    setPaymentLoading(true);
+    setError("");
+    setPaymentMessage("");
+    try {
+      await myBookingsApi.submitReceipt(success.id, (() => {
+        const data = new FormData();
+        data.append("receipt", payment.file);
+        data.append("amount", payment.amount || success.totalAmount);
+        data.append("method", payment.method);
+        return data;
+      })());
+      setPaymentMessage("Payment receipt submitted. The hotel will review it and confirm your reservation.");
+      setPayment({ file: null, method: "BANK_TRANSFER", amount: "" });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setPaymentLoading(false);
     }
   };
 
@@ -69,13 +110,14 @@ export default function Booking() {
       <>
         <section className="page-hero small-hero">
           <div className="internal-page-container">
-            <SectionHeading title="Booking confirmed!" text="Your reservation has been saved."/>
+            <SectionHeading title="Reservation saved" text="Your reservation has been recorded. Complete payment below for hotel verification."/>
           </div>
         </section>
         <section className="section internal-section" style={{ maxWidth: 600, margin: "0 auto" }}>
           <div className="form-card">
             <h2>Booking {success.bookingNumber}</h2>
             <p>Thank you, {success.guest?.fullName}. Here are your details:</p>
+            {error && <p style={{ color: "#c05d5d" }}>{error}</p>}
             <ul style={{ lineHeight: 2 }}>
               <li><b>Room:</b> {success.room?.name}</li>
               <li><b>Check-in:</b> {new Date(success.checkIn).toLocaleDateString()}</li>
@@ -85,7 +127,23 @@ export default function Booking() {
               <li><b>VAT (15%):</b> ETB {Number(success.tax).toLocaleString()}</li>
               <li><b>Total:</b> ETB {Number(success.totalAmount).toLocaleString()}</li>
             </ul>
-            <Link to="/my-bookings" className="btn btn-gold">View my bookings</Link>
+              <form onSubmit={submitPayment} style={{ background: "#fafbfc", border: "1px dashed #e9e5dc", borderRadius: 8, padding: 14, marginBottom: 16 }}>
+                <h3 style={{ margin: "0 0 6px", fontSize: 14 }}>Complete payment</h3>
+                <p style={{ fontSize: 11, color: "#8892a0", margin: "0 0 10px" }}>Upload your payment receipt for hotel verification.</p>
+                <div style={{ display: "grid", gap: 8 }}>
+                  <input type="number" min="1" placeholder={`Amount (ETB ${Number(success.totalAmount).toLocaleString()})`} value={payment.amount} onChange={(e) => setPayment({ ...payment, amount: e.target.value })} />
+                  <select value={payment.method} onChange={(e) => setPayment({ ...payment, method: e.target.value })}>
+                    <option value="BANK_TRANSFER">Bank transfer</option>
+                    <option value="MOBILE_MONEY">Mobile money</option>
+                    <option value="CARD">Card</option>
+                    <option value="CASH">Cash</option>
+                  </select>
+                  <input required type="file" accept=".pdf,image/jpeg,image/png,image/webp" onChange={(e) => setPayment({ ...payment, file: e.target.files?.[0] || null })} />
+                  <button className="btn btn-gold" disabled={paymentLoading}>{paymentLoading ? "Submitting payment..." : "Submit payment receipt"}</button>
+                </div>
+                {paymentMessage && <p style={{ color: "#39845a", fontSize: 12, marginBottom: 0 }}>{paymentMessage}</p>}
+              </form>
+              <Link to="/my-bookings" className="btn btn-gold">View my bookings</Link>
           </div>
         </section>
       </>
@@ -133,10 +191,10 @@ export default function Booking() {
 
           <div className="form-two">
             <label>Check-in
-              <input type="date" required value={form.checkIn} onChange={update("checkIn")}/>
+              <input type="date" required min={new Date().toISOString().slice(0, 10)} value={form.checkIn} onChange={update("checkIn")}/>
             </label>
             <label>Check-out
-              <input type="date" required value={form.checkOut} onChange={update("checkOut")}/>
+              <input type="date" required min={form.checkIn || new Date().toISOString().slice(0, 10)} value={form.checkOut} onChange={update("checkOut")}/>
             </label>
             <label>Room
               <select required value={form.roomId} onChange={update("roomId")}>

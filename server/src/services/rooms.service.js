@@ -59,13 +59,16 @@ export const roomsService = {
         await prisma.room.delete({ where: { id: Number(id) } });
     },
 
-    async availability({ checkIn, checkOut }) {
+    async availability({ checkIn, checkOut, guests }) {
         if (!checkIn || !checkOut)
             throw ApiError.badRequest("checkIn and checkOut are required");
 
         const ci = new Date(checkIn);
         const co = new Date(checkOut);
+        if (isNaN(ci) || isNaN(co)) throw ApiError.badRequest("Invalid dates");
         if (co <= ci) throw ApiError.badRequest("checkOut must be after checkIn");
+        if (guests !== undefined && (!Number.isInteger(Number(guests)) || Number(guests) < 1))
+            throw ApiError.badRequest("guests must be a positive number");
 
         const conflicting = await prisma.booking.findMany({
             where: {
@@ -79,7 +82,8 @@ export const roomsService = {
 
         return prisma.room.findMany({
             where: {
-                status: { not: "OUT_OF_SERVICE" },
+                status: { notIn: ["MAINTENANCE", "OUT_OF_SERVICE"] },
+                ...(guests ? { maxGuests: { gte: Number(guests) } } : {}),
                 id: { notIn: blocked },
             },
             orderBy: { pricePerNight: "asc" },

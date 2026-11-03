@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Users, BedDouble, ArrowUpRight } from "lucide-react";
 import Reveal from "./Reveal.jsx";
 
-export default function RoomCard({ room }) {
+export default function RoomCard({ room, bookingQuery = "" }) {
   const price = Number(room.pricePerNight ?? room.price ?? 0);
   const guests = Number(room.maxGuests ?? room.guests ?? 0);
 
@@ -27,7 +27,7 @@ export default function RoomCard({ room }) {
         </div>
         <div className="room-price">
           <span>From <b>ETB {price.toLocaleString()}</b> <small>/ night</small></span>
-          <Link to={`/booking?roomId=${room.id}`} aria-label={`Book ${room.name}`}>
+          <Link to={`/booking?roomId=${room.id}${bookingQuery}`} aria-label={`Book ${room.name}`}>
             <ArrowUpRight size={18}/>
           </Link>
         </div>

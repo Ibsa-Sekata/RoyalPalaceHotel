@@ -94,6 +94,13 @@ export default function AdminLayout() {
                 <small>{roleLabel}</small>
               </span>
             </div>
+            <button
+              className="admin-topbar-logout"
+              onClick={handleLogout}
+              type="button"
+            >
+              <LogOut size={14}/> Sign out
+            </button>
           </div>
         </header>
         <div className="admin-content"><Outlet/></div>

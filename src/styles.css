@@ -1911,6 +1911,21 @@
     color: #858a91;
     margin-top: 3px;
   }
+  .admin-topbar-logout {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #d8c49b;
+    border-radius: 6px;
+    background: #fffaf0;
+    color: #8e6b2d;
+    padding: 8px 11px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .admin-topbar-logout:hover {
+    background: #f5ead2;
+  }
   .admin-content {
     padding: 29px 30px 40px;
     max-width: 1800px;
