@@ -37,11 +37,9 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const wasAdminArea = previousPath.current === "/admin" || previousPath.current.startsWith("/admin/");
-    const wasGuestArea = previousPath.current.startsWith("/my-");
     const isAdminArea = location.pathname === "/admin" || location.pathname.startsWith("/admin/");
-    const isGuestArea = location.pathname.startsWith("/my-");
 
-    if ((wasAdminArea && !isAdminArea) || (wasGuestArea && !isGuestArea)) {
+    if (wasAdminArea && !isAdminArea) {
       logout();
     }
     previousPath.current = location.pathname;

@@ -1,7 +1,9 @@
-import React, { useState } from "react";
-import { CircleUserRound, Mail, Phone, Crown } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { CircleUserRound, Mail, Phone, Crown, BedDouble, Utensils } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../context/useAuth.js";
 import { apiRequest } from "../../api/client.js";
+import { diningReservationsApi } from "../../api/diningReservationsApi.js";
 
 export default function MyProfile() {
   const { user } = useAuth();
@@ -11,6 +13,16 @@ export default function MyProfile() {
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [diningReservations, setDiningReservations] = useState([]);
+  const [diningLoading, setDiningLoading] = useState(true);
+  const [diningError, setDiningError] = useState("");
+
+  useEffect(() => {
+    diningReservationsApi.mine()
+      .then((response) => setDiningReservations(response.data || []))
+      .catch((error) => setDiningError(error.message))
+      .finally(() => setDiningLoading(false));
+  }, []);
 
   const save = async (e) => {
     e.preventDefault();
@@ -35,6 +47,15 @@ export default function MyProfile() {
         <p style={{ fontSize: 13, color: "#8892a0", margin: 0 }}>
           Manage the personal details tied to your bookings.
         </p>
+      </div>
+
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
+        <Link to="/rooms" className="btn btn-gold" style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+          <BedDouble size={15}/> Browse rooms
+        </Link>
+        <Link to="/dining" className="btn btn-light" style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+          <Utensils size={15}/> Browse dining
+        </Link>
       </div>
 
       <div style={{
@@ -113,6 +134,60 @@ export default function MyProfile() {
           </button>
         </form>
       </div>
+
+      <section style={{ marginTop: 24 }}>
+        <div style={{ marginBottom: 14 }}>
+          <span style={{ fontSize: 9, letterSpacing: 2.4, color: "#a17b36", fontWeight: 700 }}>
+            DINING RESERVATIONS
+          </span>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 500, margin: "6px 0", color: "#20242a" }}>
+            Your booked tables
+          </h2>
+        </div>
+
+        {diningError && <p style={{ color: "#c05d5d", fontSize: 12 }}>{diningError}</p>}
+        {diningLoading ? (
+          <p style={{ color: "#8892a0", fontSize: 13 }}>Loading dining reservations...</p>
+        ) : diningReservations.length === 0 ? (
+          <div style={{ background: "#fff", border: "1px solid #eef0f3", borderRadius: 14, padding: "28px 24px" }}>
+            <p style={{ color: "#8892a0", fontSize: 13, margin: "0 0 16px" }}>You have no dining reservations yet.</p>
+            <Link to="/dining" className="btn btn-gold">Browse dining</Link>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gap: 12 }}>
+            {diningReservations.map((reservation) => (
+              <article key={reservation.id} style={{
+                background: "#fff", border: "1px solid #eef0f3", borderRadius: 14,
+                padding: "20px 22px", boxShadow: "0 2px 10px rgba(7,17,29,0.03)",
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: "#a17b36", fontWeight: 600, letterSpacing: 1 }}>
+                      {reservation.confirmationNumber}
+                    </div>
+                    <h3 style={{ fontSize: 18, fontFamily: "'Playfair Display', serif", margin: "4px 0", color: "#20242a" }}>
+                      {reservation.restaurantName}
+                    </h3>
+                  </div>
+                  <span style={{
+                    alignSelf: "flex-start", fontSize: 10, fontWeight: 600, padding: "5px 10px",
+                    borderRadius: 20, background: reservation.status === "CANCELLED" ? "#fdecec" : "#e9f6ed",
+                    color: reservation.status === "CANCELLED" ? "#c05d5d" : "#39845a",
+                  }}>
+                    {reservation.status.replace("_", " ")}
+                  </span>
+                </div>
+                <div style={{ display: "grid", gap: 6, marginTop: 10, color: "#555b64", fontSize: 12 }}>
+                  <span><b>Date and time:</b> {new Date(reservation.reservationStart).toLocaleString()}</span>
+                  <span><b>Guests:</b> {reservation.guests}</span>
+                  {reservation.tableNumber && <span><b>Table:</b> {reservation.tableNumber}</span>}
+                  {reservation.specialRequests && <span><b>Requests:</b> {reservation.specialRequests}</span>}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </>
   );
 }

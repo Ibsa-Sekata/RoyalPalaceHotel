@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarDays, BedDouble, Users, Plus, X } from "lucide-react";
+import { CalendarDays, BedDouble, Users, Plus, X, Utensils } from "lucide-react";
 import { myBookingsApi } from "../../api/myBookingsApi.js";
 import { useAuth } from "../../context/useAuth.js";
 
@@ -125,6 +125,9 @@ export default function MyBookings() {
         </h2>
         <Link to="/booking" className="btn btn-gold" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
           <Plus size={14}/> Book a room
+        </Link>
+        <Link to="/dining" className="btn btn-light" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+          <Utensils size={14}/> Browse dining
         </Link>
       </div>
 

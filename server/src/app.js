@@ -16,6 +16,8 @@ import contactRoutes from "./routes/contact.routes.js";
 import settingsRoutes from "./routes/settings.routes.js";
 import reportsRoutes from "./routes/reports.routes.js";
 import usersRoutes from "./routes/users.routes.js";
+import mediaRoutes from "./routes/media.routes.js";
+import diningReservationsRoutes from "./routes/diningReservations.routes.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 import { notFound } from "./middleware/notFound.middleware.js";
 
@@ -44,6 +46,8 @@ app.use("/api/v1/contact", contactRoutes);
 app.use("/api/v1/settings", settingsRoutes);
 app.use("/api/v1/reports", reportsRoutes);
 app.use("/api/v1/users", usersRoutes);
+app.use("/api/v1/media", mediaRoutes);
+app.use("/api/v1/dining-reservations", diningReservationsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

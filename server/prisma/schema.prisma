@@ -24,18 +24,19 @@ model User {
 }
 
 model Guest {
-  id          Int       @id @default(autoincrement())
-  fullName    String
-  email       String?   @unique
-  phone       String?
-  nationality String?
-  guestType   GuestType @default(NEW)
-  notes       String?
-  userId      Int?      @unique
-  user        User?     @relation("UserGuest", fields: [userId], references: [id], onDelete: SetNull)
-  bookings    Booking[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id                 Int                 @id @default(autoincrement())
+  fullName           String
+  email              String?             @unique
+  phone              String?
+  nationality        String?
+  guestType          GuestType           @default(NEW)
+  notes              String?
+  userId             Int?                @unique
+  user               User?               @relation("UserGuest", fields: [userId], references: [id], onDelete: SetNull)
+  bookings           Booking[]
+  diningReservations DiningReservation[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 }
 
 model Room {
@@ -94,9 +95,9 @@ model Payment {
   method               PaymentMethod @default(CASH)
   status               PaymentStatus @default(UNPAID)
   transactionReference String?
-  receiptData           String?
-  receiptName           String?
-  receiptMimeType       String?
+  receiptData          String?
+  receiptName          String?
+  receiptMimeType      String?
   paidAt               DateTime?
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
@@ -129,6 +130,26 @@ model ContactMessage {
   user      User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
   createdAt DateTime      @default(now())
   repliedAt DateTime?
+}
+
+model DiningReservation {
+  id                 Int                     @id @default(autoincrement())
+  confirmationNumber String                  @unique
+  guestId            Int
+  guest              Guest                   @relation(fields: [guestId], references: [id])
+  restaurantName     String
+  reservationStart   DateTime
+  reservationEnd     DateTime
+  guests             Int
+  tableNumber        String?
+  specialRequests    String?
+  status             DiningReservationStatus @default(PENDING)
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+
+  @@index([guestId])
+  @@index([reservationStart, reservationEnd])
+  @@index([restaurantName, reservationStart, reservationEnd])
 }
 
 model HotelSetting {
@@ -213,4 +234,10 @@ enum ContactStatus {
   IN_PROGRESS
   RESOLVED
   SPAM
+}
+
+enum DiningReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
 }

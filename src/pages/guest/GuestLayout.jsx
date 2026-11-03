@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
-import { Crown, CalendarDays, CircleUserRound, LogOut } from "lucide-react";
+import { Crown, CalendarDays, CircleUserRound, LogOut, BedDouble, Utensils } from "lucide-react";
 import { useAuth } from "../../context/useAuth.js";
 
 export default function GuestLayout() {
@@ -55,6 +55,18 @@ export default function GuestLayout() {
           })}>
             <CircleUserRound size={15}/> My Profile
           </NavLink>
+          <Link to="/rooms" style={{
+            fontSize: 12, color: "#3e4146", textDecoration: "none",
+            display: "flex", alignItems: "center", gap: 6,
+          }}>
+            <BedDouble size={15}/> Browse rooms
+          </Link>
+          <Link to="/dining" style={{
+            fontSize: 12, color: "#3e4146", textDecoration: "none",
+            display: "flex", alignItems: "center", gap: 6,
+          }}>
+            <Utensils size={15}/> Browse dining
+          </Link>
           <span style={{ fontSize: 11, color: "#8892a0", marginLeft: 8 }}>
             {user?.fullName}
           </span>

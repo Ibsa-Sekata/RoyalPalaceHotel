@@ -30,6 +30,7 @@ import Messages from "./pages/admin/Messages.jsx";
 import Settings from "./pages/admin/Settings.jsx";
 import Users from "./pages/admin/Users.jsx";
 import Profile from "./pages/admin/Profile.jsx";
+import ContentManagement from "./pages/admin/ContentManagement.jsx";
 
 import MyBookings from "./pages/guest/MyBookings.jsx";
 import MyProfile from "./pages/guest/MyProfile.jsx";
@@ -74,6 +75,7 @@ export default function App() {
         <Route path="settings" element={<Settings />} />
         <Route path="users" element={<Users />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="content" element={<ContentManagement />} />
       </Route>
 
       <Route

@@ -1,5 +1,133 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import SectionHeading from "../../components/SectionHeading.jsx";
-const dining=[["The Royal Table","Contemporary Ethiopian & international","photo-1414235077428-338989a2e8c0"],["Golden Hour Lounge","Craft coffee, signature drinks & light bites","photo-1517248135467-4c7edcad34c4"],["Garden Terrace","Fresh seasonal plates under the open sky","photo-1515003197210-e0cd7184f8b5"]];
-export default function Dining(){return <><section className="page-hero small-hero"><div className="internal-page-container"><SectionHeading title="Dining at Royal Palace" text="Distinctive flavours, gracious service and spaces made for lingering."/></div></section><section className="section internal-section"><div className="feature-banner"><img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1500&q=85" alt="Fine dining"/><div><span className="eyebrow">SIGNATURE RESTAURANT</span><h2>Gather around<br/><em>something exceptional.</em></h2><p>Seasonal ingredients and thoughtful technique come together in a warm, elegant setting.</p><Link className="btn btn-gold" to="/contact">Reserve a table</Link></div></div><div className="feature-grid">{dining.map(([name,desc,img])=><article className="feature-card" key={name}><img src={`https://images.unsplash.com/${img}?auto=format&fit=crop&w=900&q=80`} alt={name}/><div><h3>{name}</h3><p>{desc}</p><Link className="text-link" to="/contact">Discover more →</Link></div></article>)}</div></section></>}
+import { useSiteContent, contentImage } from "../../hooks/useSiteContent.js";
+import { diningReservationsApi } from "../../api/diningReservationsApi.js";
+import { useAuth } from "../../context/useAuth.js";
+
+const tables = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8"];
+
+export default function Dining() {
+  const { content, loading } = useSiteContent();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const dining = content.dining;
+  const [form, setForm] = useState({ restaurantName: "", date: "", time: "", guests: "2", tableNumber: "", specialRequests: "" });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [confirmation, setConfirmation] = useState(null);
+  const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+
+  useEffect(() => {
+    if (dining.length && !form.restaurantName) {
+      setForm((current) => ({ ...current, restaurantName: dining[0].name }));
+    }
+  }, [dining, form.restaurantName]);
+
+  const update = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
+
+  const submitReservation = async (event) => {
+    event.preventDefault();
+    if (!user) {
+      navigate("/login", { state: { from: "/dining" } });
+      return;
+    }
+    setError("");
+    setSubmitting(true);
+    try {
+      const response = await diningReservationsApi.create({ ...form, guests: Number(form.guests) });
+      setConfirmation(response.data);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      <section className="page-hero small-hero">
+        <div className="internal-page-container">
+          <SectionHeading title="Dining at Royal Palace" text="Distinctive flavours, gracious service and spaces made for lingering." />
+        </div>
+      </section>
+      <section className="section internal-section">
+        {loading ? <p className="empty-state">Loading dining...</p> : dining.length === 0 ? <p className="empty-state">No dining experiences are available.</p> : (
+          <>
+            <div className="feature-banner">
+              <img src={contentImage(dining[0].image, 1500)} alt={dining[0].name} />
+              <div>
+                <span className="eyebrow">SIGNATURE RESTAURANT</span>
+                <h2>Gather around<br /><em>something exceptional.</em></h2>
+                <p>{dining[0].description}</p>
+                <a className="btn btn-gold" href="#dining-reservation">Reserve a table</a>
+              </div>
+            </div>
+            <div className="feature-grid">
+              {dining.map((item) => (
+                <article className="feature-card" key={item.id || item.name}>
+                  <img src={contentImage(item.image, 900)} alt={item.name} />
+                  <div>
+                    <h3>{item.name}</h3>
+                    <p>{item.description}</p>
+                    {Array.isArray(item.menu) && item.menu.length > 0 && (
+                      <div><strong>Menu</strong><ul>{item.menu.map((dish) => <li key={dish}>{dish}</li>)}</ul></div>
+                    )}
+                    <a className="text-link" href="#dining-reservation">Reserve here</a>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div id="dining-reservation" className="form-card" style={{ maxWidth: 760, margin: "64px auto 0" }}>
+              {confirmation ? (
+                <>
+                  <SectionHeading title="Dining reservation confirmed!" text="Your table has been reserved successfully." />
+                  <p><b>Confirmation:</b> {confirmation.confirmationNumber}</p>
+                  <p><b>Restaurant:</b> {confirmation.restaurantName}</p>
+                  <p><b>Date and time:</b> {new Date(confirmation.reservationStart).toLocaleString()}</p>
+                  <p><b>Guests:</b> {confirmation.guests}</p>
+                  {confirmation.tableNumber && <p><b>Table:</b> {confirmation.tableNumber}</p>}
+                  <Link className="btn btn-gold" to="/dining">Make another reservation</Link>
+                </>
+              ) : (
+                <form onSubmit={submitReservation}>
+                  <h2>Reserve your table</h2>
+                  <p>Choose your restaurant, preferred time, party size, and table preference.</p>
+                  {error && <p style={{ color: "#c05d5d" }}>{error}</p>}
+                  <div className="form-two">
+                    <label>Restaurant
+                      <select required value={form.restaurantName} onChange={update("restaurantName")}>
+                        {dining.map((item) => <option key={item.id || item.name} value={item.name}>{item.name}</option>)}
+                      </select>
+                    </label>
+                    <label>Guests
+                      <select value={form.guests} onChange={update("guests")}>
+                        {Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1} {index === 0 ? "guest" : "guests"}</option>)}
+                      </select>
+                    </label>
+                    <label>Date
+                      <input type="date" required min={today} value={form.date} onChange={update("date")} />
+                    </label>
+                    <label>Time
+                      <input type="time" required value={form.time} onChange={update("time")} />
+                    </label>
+                    <label>Preferred table
+                      <select value={form.tableNumber} onChange={update("tableNumber")}>
+                        <option value="">Any available table</option>
+                        {tables.map((table) => <option key={table} value={table}>{table}</option>)}
+                      </select>
+                    </label>
+                  </div>
+                  <label>Special requests (optional)
+                    <textarea rows="3" value={form.specialRequests} onChange={update("specialRequests")} placeholder="Dietary needs, celebration, or seating requests" />
+                  </label>
+                  <button className="btn btn-gold full-width" disabled={submitting}>{submitting ? "Reserving..." : user ? "Confirm dining reservation" : "Sign in to reserve"}</button>
+                </form>
+              )}
+            </div>
+          </>
+        )}
+      </section>
+    </>
+  );
+}

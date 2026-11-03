@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
-import { LayoutDashboard, CalendarDays, BedDouble, Users, ArrowLeftRight, Sparkles, CreditCard, ChartNoAxesCombined, Settings, UserRound, Crown, Search, Bell, Mail, LogOut, CircleUserRound } from "lucide-react";
+import { LayoutDashboard, CalendarDays, BedDouble, Users, ArrowLeftRight, Sparkles, CreditCard, ChartNoAxesCombined, Settings, UserRound, Crown, Search, Bell, Mail, LogOut, CircleUserRound, Images } from "lucide-react";
 import { useAuth } from "../context/useAuth.js";
 
 const nav = [
@@ -15,6 +15,7 @@ const nav = [
   ["Messages","/admin/messages",Mail],
   ["Users","/admin/users",UserRound],
   ["Settings","/admin/settings",Settings],
+  ["Website content","/admin/content",Images],
 ];
 
 export default function AdminLayout() {

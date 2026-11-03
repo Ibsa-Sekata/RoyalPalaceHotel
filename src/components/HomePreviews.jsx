@@ -8,20 +8,13 @@ import {
 import { Link } from "react-router-dom";
 import RoomCard from "./RoomCard.jsx";
 import AboutSection from "./AboutSection.jsx";
-import { amenities, rooms } from "../data.js";
+import { rooms } from "../data.js";
 import Reveal from "./Reveal.jsx";
-
-const galleryImages = [
-  ["Grand arrival", "photo-1519167758481-83f550bb49b3"],
-  ["A restful room", "photo-1611892440504-42a792e24d32"],
-  ["Dining moments", "photo-1414235077428-338989a2e8c0"],
-  ["Golden evenings", "photo-1517248135467-4c7edcad34c4"],
-  ["Designed to unwind", "photo-1566665797739-1674de7a421a"],
-];
-
-const amenityFallbackImage = "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1000&q=85";
+import { useSiteContent, contentImage } from "../hooks/useSiteContent.js";
 
 export default function HomePreviews() {
+  const { content, loading } = useSiteContent();
+  const dining = content.dining[0];
   return (
     <>
       <AboutSection id="about-preview" compact />
@@ -39,12 +32,12 @@ export default function HomePreviews() {
 
       <section id="dining-preview" className="home-preview-band">
         <Reveal className="home-preview-band-image">
-          <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1400&q=85" alt="Elegant Royal Palace restaurant dining room" loading="lazy" />
+          {dining && <img src={contentImage(dining.image, 1400)} alt={dining.name} loading="lazy" />}
         </Reveal>
         <Reveal className="home-preview-band-copy" delay={120}>
           <span className="eyebrow">DINING AT ROYAL PALACE</span>
           <h2>Gather around <em>something exceptional.</em></h2>
-          <p>From contemporary Ethiopian flavours to signature drinks, every table is set for memorable moments.</p>
+          <p>{dining?.description || "Discover memorable dining experiences at Royal Palace."}</p>
           <Link className="btn btn-gold" to="/dining">Explore Dining <ArrowRight size={16} /></Link>
         </Reveal>
       </section>
@@ -55,27 +48,22 @@ export default function HomePreviews() {
           <p>Everything you need for restorative days, productive stays, and effortless comfort.</p>
         </Reveal>
         <div className="home-amenity-grid">
-          {amenities.map(({ title, description, image }, index) => (
+          {content.amenities.map(({ name, description, image }, index) => (
             <Reveal
               as="article"
               className="home-amenity-card"
-              key={title}
+              key={name}
               delay={index * 80}
             >
               <img
                 className="home-amenity-image"
-                src={image}
-                alt=""
+                src={contentImage(image)}
+                alt={name}
                 aria-hidden="true"
                 loading="lazy"
-                onError={(event) => {
-                  if (event.currentTarget.src !== amenityFallbackImage) {
-                    event.currentTarget.src = amenityFallbackImage;
-                  }
-                }}
               />
               <div className="home-amenity-content">
-                <h3>{title}</h3>
+                <h3>{name}</h3>
                 <p>{description}</p>
               </div>
             </Reveal>
@@ -90,13 +78,14 @@ export default function HomePreviews() {
           <Link className="text-link" to="/gallery">View full gallery <ArrowRight size={16} /></Link>
         </Reveal>
         <div className="home-gallery-grid">
-          {galleryImages.map(([title, image]) => (
-            <Reveal as={Link} className="home-gallery-item" to="/gallery" key={title} delay={galleryImages.indexOf(galleryImages.find((item) => item[0] === title)) * 70}>
-              <img src={`https://images.unsplash.com/${image}?auto=format&fit=crop&w=1000&q=85`} alt={title} loading="lazy" />
-              <span>{title}</span>
+          {content.gallery.map((item, index) => (
+            <Reveal as={Link} className="home-gallery-item" to="/gallery" key={item.id || item.name} delay={index * 70}>
+              <img src={contentImage(item.image)} alt={item.name} loading="lazy" />
+              <span>{item.name}</span>
             </Reveal>
           ))}
         </div>
+        {!loading && content.gallery.length === 0 && <p className="empty-state">No gallery items are available.</p>}
       </section>
 
       <section id="offers-preview" className="home-offers-section">

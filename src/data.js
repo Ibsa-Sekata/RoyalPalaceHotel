@@ -21,13 +21,3 @@ export const revenueData = [
 export const occupancyData = [
   { name: "Occupied", value: 86 }, { name: "Available", value: 32 }, { name: "Maintenance", value: 6 }
 ];
-export const amenities = [
-  { title: "Wellness & Pool", description: "Find your calm with restorative treatments and refreshing swims.", image: "https://images.unsplash.com/photo-1540555700478-4be289f3be3?auto=format&fit=crop&w=1000&q=85" },
-  { title: "Fitness Studio", description: "A considered space to keep your routine moving.", image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1000&q=85" },
-  { title: "Signature Dining", description: "Memorable meals, crafted with seasonal ingredients.", image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1000&q=85" },
-  { title: "High-speed Wi-Fi", description: "Stay connected throughout your visit.", image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1000&q=85" },
-  { title: "Valet Parking", description: "Arrive and depart with ease.", image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1000&q=85" },
-  { title: "24-hour Concierge", description: "Local guidance and thoughtful assistance, whenever you need it.", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1000&q=85" },
-  { title: "Daily Housekeeping", description: "A fresh, comfortable space every day.", image: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1000&q=85" },
-  { title: "Business Lounge", description: "Quiet, well-equipped spaces for work and meetings.", image: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1000&q=85" },
-];
