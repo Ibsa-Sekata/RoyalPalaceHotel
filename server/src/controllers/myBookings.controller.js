@@ -11,4 +11,8 @@ export const myBookingsController = {
   async cancel(req, res) {
     res.json({ success: true, data: await myBookingsService.cancel(req.params.id, req.user.id) });
   },
+  async remove(req, res) {
+    await myBookingsService.remove(req.params.id, req.user.id);
+    res.status(204).send();
+  },
 };

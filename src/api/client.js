@@ -8,14 +8,15 @@ export async function apiRequest(path, { method = "GET", body, token, query } = 
     });
   }
 
-  const headers = { "Content-Type": "application/json" };
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+  const headers = isFormData ? {} : { "Content-Type": "application/json" };
   const authToken = token || localStorage.getItem("token");
   if (authToken) headers.Authorization = `Bearer ${authToken}`;
 
   const res = await fetch(url.toString(), {
     method,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
+    body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
   });
 
   const json = await res.json().catch(() => ({}));

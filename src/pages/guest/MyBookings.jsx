@@ -11,6 +11,7 @@ export default function MyBookings() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(null);
   const [flash, setFlash] = useState("");
+  const [receipt, setReceipt] = useState({});
 
   const load = async () => {
     setLoading(true); setError("");
@@ -33,6 +34,34 @@ export default function MyBookings() {
     } catch (e) {
       setError(e.message);
     } finally { setBusy(null); }
+  };
+
+  const deleteBooking = async (id) => {
+    if (!window.confirm("Delete this booking permanently? Payment receipts will also be deleted.")) return;
+    setBusy(id); setError(""); setFlash("");
+    try {
+      await myBookingsApi.remove(id);
+      setFlash("Booking deleted");
+      await load();
+    } catch (e) { setError(e.message); }
+    finally { setBusy(null); }
+  };
+
+  const submitReceipt = async (booking) => {
+    const selected = receipt[booking.id]?.file;
+    if (!selected) return setError("Choose a receipt file first.");
+    setBusy(booking.id); setError(""); setFlash("");
+    try {
+      const data = new FormData();
+      data.append("receipt", selected);
+      data.append("amount", receipt[booking.id]?.amount || booking.totalAmount);
+      data.append("method", receipt[booking.id]?.method || "BANK_TRANSFER");
+      await myBookingsApi.submitReceipt(booking.id, data);
+      setReceipt({ ...receipt, [booking.id]: {} });
+      setFlash("Receipt submitted. The hotel will review and confirm your booking.");
+      await load();
+    } catch (e) { setError(e.message); }
+    finally { setBusy(null); }
   };
 
   const statusBadge = (status) => {
@@ -80,13 +109,13 @@ export default function MyBookings() {
 
       {flash && (
         <div style={{ background: "#e9f6ed", color: "#39845a", padding: "12px 16px", borderRadius: 8, marginBottom: 16, fontSize: 12 }}>
-          ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ {flash}
+          {flash}
         </div>
       )}
 
       {error && (
         <div style={{ background: "#fdecec", color: "#c05d5d", padding: "12px 16px", borderRadius: 8, marginBottom: 16, fontSize: 12 }}>
-          ÃƒÂ¢Ã‚ÂÃ…â€™ {error}
+          {error}
         </div>
       )}
 
@@ -100,7 +129,7 @@ export default function MyBookings() {
       </div>
 
       {loading ? (
-        <p style={{ textAlign: "center", padding: 60, color: "#8892a0" }}>Loading your bookingsÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</p>
+        <p style={{ textAlign: "center", padding: 60, color: "#8892a0" }}>Loading your bookings...</p>
       ) : bookings.length === 0 ? (
         <div style={{
           background: "#fff", border: "1px solid #eef0f3", borderRadius: 14,
@@ -173,6 +202,23 @@ export default function MyBookings() {
                 </div>
               )}
 
+              {["PENDING", "CONFIRMED"].includes(b.status) && (
+                <div style={{ background: "#fafbfc", border: "1px dashed #e9e5dc", borderRadius: 8, padding: 14, marginBottom: 14 }}>
+                  <b style={{ fontSize: 12 }}>Pay and upload receipt</b>
+                  <p style={{ fontSize: 11, color: "#8892a0", margin: "5px 0 10px" }}>You may submit multiple payments. Each receipt is reviewed by the hotel.</p>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                    <input type="number" min="1" placeholder={`Amount (total ETB ${Number(b.totalAmount).toLocaleString()})`} value={receipt[b.id]?.amount || ""} onChange={e=>setReceipt({...receipt,[b.id]:{...receipt[b.id],amount:e.target.value}})} />
+                    <select value={receipt[b.id]?.method || "BANK_TRANSFER"} onChange={e=>setReceipt({...receipt,[b.id]:{...receipt[b.id],method:e.target.value}})}>
+                      <option>BANK_TRANSFER</option><option>MOBILE_MONEY</option><option>CASH</option><option>CARD</option>
+                    </select>
+                    <input type="file" accept=".pdf,image/jpeg,image/png,image/webp" onChange={e=>setReceipt({...receipt,[b.id]:{...receipt[b.id],file:e.target.files[0]}})} />
+                    <button className="btn btn-small btn-gold" disabled={busy === b.id} onClick={() => submitReceipt(b)}>
+                      {busy === b.id ? "Uploading..." : "Submit receipt"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 14, borderTop: "1px solid #f0f1f2" }}>
                 <div>
                   <div style={{ fontSize: 10, color: "#8892a0" }}>Total</div>
@@ -187,9 +233,17 @@ export default function MyBookings() {
                     onClick={() => cancelBooking(b.id)}
                     style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#c05d5d" }}
                   >
-                    <X size={13}/> {busy === b.id ? "CancellingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦" : "Cancel booking"}
+                    <X size={13}/> {busy === b.id ? "Cancelling..." : "Cancel booking"}
                   </button>
                 )}
+                <button
+                  className="btn btn-small btn-light"
+                  disabled={busy === b.id}
+                  onClick={() => deleteBooking(b.id)}
+                  style={{ color: "#c05d5d" }}
+                >
+                  {busy === b.id ? "Deleting..." : "Delete booking"}
+                </button>
               </div>
             </div>
           ))}

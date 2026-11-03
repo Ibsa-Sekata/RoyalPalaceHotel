@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Crown } from "lucide-react";
+import { Crown, Eye, EyeOff } from "lucide-react";
 import { authApi } from "../../api/authApi.js";
 import { useAuth } from "../../context/useAuth.js";
 
@@ -10,6 +10,7 @@ export default function Register() {
   const [form, setForm] = useState({ fullName: "", email: "", password: "", phone: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
@@ -54,13 +55,18 @@ export default function Register() {
           <input type="tel" value={form.phone} onChange={update("phone")} placeholder="+251..."/>
         </label>
         <label>Password
-          <input type="password" required minLength="8" value={form.password} onChange={update("password")} placeholder="At least 8 characters"/>
+          <div className="password-wrap">
+            <input type={showPassword ? "text" : "password"} required minLength="8" value={form.password} onChange={update("password")} placeholder="At least 8 characters"/>
+            <button type="button" className="password-toggle" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)}>
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
         </label>
 
         {error && <small style={{ color: "#c05d5d" }}>{error}</small>}
 
         <button className="btn btn-gold full-width" disabled={loading}>
-          {loading ? "CreatingÃ¢â‚¬Â¦" : "Create account"}
+          {loading ? "Creating..." : "Create account"}
         </button>
         <p className="form-note">
           Already have an account? <Link to="/login">Sign in</Link>

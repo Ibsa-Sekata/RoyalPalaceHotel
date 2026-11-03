@@ -3,7 +3,17 @@ import { ApiError } from "../utils/apiError.js";
 
 export const myBookingsService = {
   async list({ userId, status, page = 1, limit = 20 }) {
-    const where = { userId: Number(userId) };
+    const user = await prisma.user.findUnique({
+      where: { id: Number(userId) },
+      select: { id: true, email: true },
+    });
+    const where = {
+      OR: [
+        { userId: Number(userId) },
+        { guest: { userId: Number(userId) } },
+        ...(user?.email ? [{ guest: { email: user.email } }] : []),
+      ],
+    };
     if (status) where.status = status;
     const skip = (Number(page) - 1) * Number(limit);
     const [items, total] = await Promise.all([
@@ -20,13 +30,22 @@ export const myBookingsService = {
   },
 
   async getById(id, userId) {
-    const b = await prisma.booking.findUnique({
-      where: { id: Number(id) },
+    const user = await prisma.user.findUnique({
+      where: { id: Number(userId) },
+      select: { id: true, email: true },
+    });
+    const b = await prisma.booking.findFirst({
+      where: {
+        id: Number(id),
+        OR: [
+          { userId: Number(userId) },
+          { guest: { userId: Number(userId) } },
+          ...(user?.email ? [{ guest: { email: user.email } }] : []),
+        ],
+      },
       include: { room: true, payments: true },
     });
     if (!b) throw ApiError.notFound("Booking not found");
-    if (Number(b.userId) !== Number(userId))
-      throw ApiError.forbidden("You do not own this booking");
     return b;
   },
 
@@ -51,5 +70,19 @@ export const myBookingsService = {
       await prisma.room.update({ where: { id: b.roomId }, data: { status: "AVAILABLE" } });
 
     return updated;
+  },
+
+  async remove(id, userId) {
+    const booking = await this.getById(id, userId);
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.deleteMany({ where: { bookingId: booking.id } });
+      await tx.booking.delete({ where: { id: booking.id } });
+      if (booking.status === "CHECKED_IN") {
+        await tx.room.update({
+          where: { id: booking.roomId },
+          data: { status: "AVAILABLE" },
+        });
+      }
+    });
   },
 };

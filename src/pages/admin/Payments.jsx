@@ -55,6 +55,10 @@ export default function Payments() {
     if (!window.confirm("Delete this payment record permanently?")) return;
     try { await paymentsApi.remove(id); await load(); } catch (e) { alert(e.message); }
   };
+  const review = async (id, approve) => {
+    try { await (approve ? paymentsApi.approve(id) : paymentsApi.reject(id)); await load(); }
+    catch (e) { alert(e.message); }
+  };
 
   return (
     <>
@@ -109,10 +113,13 @@ export default function Payments() {
                     <td>{p.booking?.bookingNumber}</td>
                     <td>{p.booking?.guest?.fullName}</td>
                     <td>ETB {Number(p.amount).toLocaleString()}</td>
-                    <td>{p.method}</td>
+                    <td>{p.method}{p.receiptName && <div><a className="text-link" href={`data:${p.receiptMimeType};base64,${p.receiptData}`} target="_blank" rel="noreferrer">View receipt</a></div>}</td>
                     <td><span className={`status status-${p.status.toLowerCase()}`}>{p.status}</span></td>
                     <td>{new Date(p.createdAt).toLocaleDateString()}</td>
-                    <td><button className="btn btn-small btn-light" onClick={() => viewInvoice(p.id)}><Download size={13}/> Invoice</button>{" "}<button className="btn btn-small btn-light" onClick={() => remove(p.id)}><Trash2 size={13}/> Delete</button></td>
+                    <td>
+                      {p.receiptName && p.status === "UNPAID" && <><button className="btn btn-small btn-gold" onClick={() => review(p.id, true)}>Approve</button>{" "}<button className="btn btn-small btn-light" onClick={() => review(p.id, false)}>Reject</button>{" "}</>}
+                      <button className="btn btn-small btn-light" onClick={() => viewInvoice(p.id)}><Download size={13}/> Invoice</button>{" "}<button className="btn btn-small btn-light" onClick={() => remove(p.id)}><Trash2 size={13}/> Delete</button>
+                    </td>
                   </tr>
                 ))}
             </tbody>

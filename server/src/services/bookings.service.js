@@ -113,7 +113,13 @@ export const bookingsService = {
   },
 
   async remove(id) {
-    await this.getById(id);
-    await prisma.booking.delete({ where: { id: Number(id) } });
+    const booking = await this.getById(id);
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.deleteMany({ where: { bookingId: booking.id } });
+      await tx.booking.delete({ where: { id: booking.id } });
+      if (booking.status === "CHECKED_IN") {
+        await tx.room.update({ where: { id: booking.roomId }, data: { status: "AVAILABLE" } });
+      }
+    });
   },
 };

@@ -11,6 +11,8 @@ router.get("/", asyncHandler(paymentsController.list));
 router.get("/:id", asyncHandler(paymentsController.getById));
 router.post("/", asyncHandler(paymentsController.create));
 router.patch("/:id", asyncHandler(paymentsController.update));
+router.post("/:id/approve", asyncHandler(paymentsController.approve));
+router.post("/:id/reject", asyncHandler(paymentsController.reject));
 router.delete("/:id", asyncHandler(paymentsController.remove));
 router.get("/:id/invoice", asyncHandler(paymentsController.invoice));
 

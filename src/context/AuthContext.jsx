@@ -1,11 +1,14 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { authApi } from "../api/authApi.js";
 
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const location = useLocation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const previousPath = useRef(location.pathname);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -31,6 +34,18 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("token");
     setUser(null);
   };
+
+  useEffect(() => {
+    const wasAdminArea = previousPath.current === "/admin" || previousPath.current.startsWith("/admin/");
+    const wasGuestArea = previousPath.current.startsWith("/my-");
+    const isAdminArea = location.pathname === "/admin" || location.pathname.startsWith("/admin/");
+    const isGuestArea = location.pathname.startsWith("/my-");
+
+    if ((wasAdminArea && !isAdminArea) || (wasGuestArea && !isGuestArea)) {
+      logout();
+    }
+    previousPath.current = location.pathname;
+  }, [location.pathname]);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout }}>

@@ -49,9 +49,60 @@ export const paymentsService = {
     },
 
     async update(id, data) {
-        await this.getById(id);
+        const payment = await this.getById(id);
         if (data.status === "PAID" && !data.paidAt) data.paidAt = new Date();
-        return prisma.payment.update({ where: { id: Number(id) }, data });
+        const updated = await prisma.payment.update({ where: { id: Number(id) }, data, include: { booking: { include: { guest: true, room: true } } } });
+        if (data.status === "PAID" && payment.booking.status === "PENDING") {
+            await prisma.booking.update({ where: { id: payment.bookingId }, data: { status: "CONFIRMED" } });
+        }
+        return updated;
+    },
+
+    async createReceipt({ bookingId, userId, amount, method, file }) {
+        const user = await prisma.user.findUnique({
+            where: { id: Number(userId) },
+            select: { id: true, email: true },
+        });
+        if (!user) throw ApiError.unauthorized("Guest account not found");
+
+        const booking = await prisma.booking.findFirst({
+            where: {
+                id: Number(bookingId),
+                OR: [
+                    { userId: user.id },
+                    { guest: { userId: user.id } },
+                    { guest: { email: user.email } },
+                ],
+            },
+        });
+        if (!booking) throw ApiError.notFound("Booking not found");
+        if (["CANCELLED", "CHECKED_OUT"].includes(booking.status)) {
+            throw ApiError.badRequest("This booking cannot receive a payment");
+        }
+        if (!file) throw ApiError.badRequest("Receipt file is required");
+        const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+        if (!allowed.includes(file.mimetype)) throw ApiError.badRequest("Receipt must be a PDF, JPG, PNG, or WEBP file");
+        if (file.size > 8 * 1024 * 1024) throw ApiError.badRequest("Receipt must be smaller than 8 MB");
+        if (!booking.userId) {
+            await prisma.booking.update({
+                where: { id: booking.id },
+                data: { userId: user.id },
+            });
+        }
+        return prisma.payment.create({
+            data: {
+                invoiceNumber: await generateInvoiceNumber(),
+                bookingId: booking.id,
+                amount: amount == null || amount === "" ? booking.totalAmount : Number(amount),
+                currency: "ETB",
+                method: method || "BANK_TRANSFER",
+                status: "UNPAID",
+                receiptData: file.buffer.toString("base64"),
+                receiptName: file.originalname,
+                receiptMimeType: file.mimetype,
+            },
+            include: { booking: { include: { guest: true, room: true } } },
+        });
     },
 
     async remove(id) {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Crown, Eye } from "lucide-react";
+import { Crown, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../context/useAuth.js";
 
 export default function Login() {
@@ -9,6 +9,7 @@ export default function Login() {
   const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -55,9 +56,11 @@ export default function Login() {
         </label>
         <label>Password
           <div className="password-wrap">
-            <input type="password" required placeholder="Enter your password"
+            <input type={showPassword ? "text" : "password"} required placeholder="Enter your password"
               value={password} onChange={(e) => setPassword(e.target.value)} />
-            <Eye size={16} />
+            <button type="button" className="password-toggle" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)}>
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
           </div>
         </label>
         {error && <small style={{ color: "#c05d5d" }}>{error}</small>}

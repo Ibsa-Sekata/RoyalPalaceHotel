@@ -94,6 +94,9 @@ model Payment {
   method               PaymentMethod @default(CASH)
   status               PaymentStatus @default(UNPAID)
   transactionReference String?
+  receiptData           String?
+  receiptName           String?
+  receiptMimeType       String?
   paidAt               DateTime?
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt

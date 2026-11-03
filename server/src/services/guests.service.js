@@ -32,7 +32,18 @@ export const guestsService = {
         return prisma.guest.update({ where: { id: Number(id) }, data });
     },
     async remove(id) {
-        await this.getById(id);
-        await prisma.guest.delete({ where: { id: Number(id) } });
+        const guest = await this.getById(id);
+        await prisma.$transaction(async (tx) => {
+            const bookings = await tx.booking.findMany({
+                where: { guestId: guest.id },
+                select: { id: true },
+            });
+            const bookingIds = bookings.map((booking) => booking.id);
+            if (bookingIds.length) {
+                await tx.payment.deleteMany({ where: { bookingId: { in: bookingIds } } });
+                await tx.booking.deleteMany({ where: { id: { in: bookingIds } } });
+            }
+            await tx.guest.delete({ where: { id: guest.id } });
+        });
     },
 };

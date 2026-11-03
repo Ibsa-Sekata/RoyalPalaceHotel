@@ -51,10 +51,10 @@ export default function AdminLayout() {
           ))}
         </nav>
         <div className="sidebar-help">
-          <span className="help-icon">Ã¢Å“Â¦</span>
+          <span className="help-icon">Help</span>
           <b>Need assistance?</b>
           <small>Contact hotel support</small>
-          <Link to="/contact">Get help Ã¢â€ â€™</Link>
+          <Link to="/contact">Get help</Link>
         </div>
         <button
           onClick={handleLogout}
@@ -75,7 +75,7 @@ export default function AdminLayout() {
         >
           <LogOut size={14}/> Sign out
         </button>
-        <Link className="back-site" to="/">Ã¢â€ Â View hotel website</Link>
+        <Link className="back-site" to="/">View hotel website</Link>
       </aside>
 
       <section className="admin-main">

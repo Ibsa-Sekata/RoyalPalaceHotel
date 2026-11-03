@@ -1717,6 +1717,18 @@
   .password-wrap svg {
     color: #888;
   }
+  .password-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    padding: 4px;
+    background: transparent;
+    color: #888;
+  }
+  .password-toggle:hover {
+    color: var(--gold-dark);
+  }
   .auth-form .text-link {
     margin-top: 7px;
   }

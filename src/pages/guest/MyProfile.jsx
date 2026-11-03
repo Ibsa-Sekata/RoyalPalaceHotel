@@ -17,9 +17,9 @@ export default function MyProfile() {
     setSaving(true); setMessage("");
     try {
       await apiRequest("/auth/profile", { method: "PATCH", body: form });
-      setMessage("Ã¢Å“â€¦ Profile updated successfully");
+      setMessage("Profile updated successfully");
     } catch (e) {
-      setMessage("Ã¢ÂÅ’ " + e.message);
+      setMessage(e.message);
     } finally { setSaving(false); }
   };
 
@@ -63,8 +63,8 @@ export default function MyProfile() {
         {message && (
           <div style={{
             padding: "12px 16px", borderRadius: 8, marginBottom: 18, fontSize: 12,
-            background: message.startsWith("Ã¢Å“â€¦") ? "#e9f6ed" : "#fdecec",
-            color: message.startsWith("Ã¢Å“â€¦") ? "#39845a" : "#c05d5d",
+            background: message.startsWith("Profile updated") ? "#e9f6ed" : "#fdecec",
+            color: message.startsWith("Profile updated") ? "#39845a" : "#c05d5d",
           }}>
             {message}
           </div>
@@ -109,7 +109,7 @@ export default function MyProfile() {
           </div>
 
           <button className="btn btn-gold" disabled={saving}>
-            {saving ? "SavingÃ¢â‚¬Â¦" : "Save changes"}
+            {saving ? "Saving..." : "Save changes"}
           </button>
         </form>
       </div>
