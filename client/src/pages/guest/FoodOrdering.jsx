@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { foodOrdersApi } from "../../api/foodOrdersApi.js";
 import { useAuth } from "../../context/useAuth.js";
 import { io } from "socket.io-client";
+import { SOCKET_URL } from "../../config.js";
 
 export default function FoodOrdering() {
   const { user } = useAuth();
@@ -26,8 +27,7 @@ export default function FoodOrdering() {
 
   useEffect(() => {
     if (!user) return undefined;
-    const base = (import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1").replace(/\/api\/v1\/?$/, "");
-    const socket = io(base, { auth: { token: localStorage.getItem("token") } });
+    const socket = io(SOCKET_URL, { auth: { token: localStorage.getItem("token") } });
     const updateOrder = (order) => setOrders((current) => current.some((item) => item.id === order.id)
       ? current.map((item) => item.id === order.id ? order : item)
       : [order, ...current]);

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { io } from "socket.io-client";
 import AdminPageHeader from "../../components/AdminPageHeader.jsx";
 import { foodOrdersApi } from "../../api/foodOrdersApi.js";
+import { SOCKET_URL } from "../../config.js";
 
 const columns = [
   ["PENDING", "New Orders", "CONFIRMED", "Accept"],
@@ -18,8 +19,7 @@ export default function KitchenDashboard() {
   const load = () => foodOrdersApi.kitchen().then((response) => setOrders(response.data || [])).catch((e) => setError(e.message));
   useEffect(() => {
     load();
-    const base = (import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1").replace(/\/api\/v1\/?$/, "");
-    const socket = io(base, { auth: { token: localStorage.getItem("token") } });
+    const socket = io(SOCKET_URL, { auth: { token: localStorage.getItem("token") } });
     const refresh = (order) => setOrders((current) => {
       const exists = current.some((item) => item.id === order.id);
       return exists ? current.map((item) => item.id === order.id ? order : item) : [...current, order];

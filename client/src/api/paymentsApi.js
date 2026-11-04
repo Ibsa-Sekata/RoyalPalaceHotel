@@ -1,4 +1,5 @@
 ﻿import { apiRequest } from "./client.js";
+import { API_URL } from "../config.js";
 export const paymentsApi = {
   list: (query) => apiRequest("/payments", { query }),
   create: (body) => apiRequest("/payments", { method: "POST", body }),
@@ -6,5 +7,5 @@ export const paymentsApi = {
   remove: (id) => apiRequest(`/payments/${id}`, { method: "DELETE" }),
   approve: (id) => apiRequest(`/payments/${id}/approve`, { method: "POST" }),
   reject: (id) => apiRequest(`/payments/${id}/reject`, { method: "POST" }),
-  invoiceUrl: (id) => `${import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1"}/payments/${id}/invoice`,
+  invoiceUrl: (id) => `${API_URL}/payments/${id}/invoice`,
 };
