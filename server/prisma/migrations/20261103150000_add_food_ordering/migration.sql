@@ -71,22 +71,22 @@ ALTER TABLE "FoodOrder" ADD CONSTRAINT "FoodOrder_userId_fkey" FOREIGN KEY ("use
 ALTER TABLE "FoodOrderItem" ADD CONSTRAINT "FoodOrderItem_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "FoodOrder"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "FoodOrderItem" ADD CONSTRAINT "FoodOrderItem_menuItemId_fkey" FOREIGN KEY ("menuItemId") REFERENCES "MenuItem"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
-INSERT INTO "MenuCategory" ("name", "description", "sortOrder")
+INSERT INTO "MenuCategory" ("name", "description", "sortOrder", "updatedAt")
 VALUES
-  ('Breakfast', 'A generous start to your day.', 1),
-  ('Main Courses', 'Royal Palace favourites prepared to order.', 2),
-  ('Beverages', 'Fresh juices, coffee, tea, and cocktails.', 3)
+  ('Breakfast', 'A generous start to your day.', 1, CURRENT_TIMESTAMP),
+  ('Main Courses', 'Royal Palace favourites prepared to order.', 2, CURRENT_TIMESTAMP),
+  ('Beverages', 'Fresh juices, coffee, tea, and cocktails.', 3, CURRENT_TIMESTAMP)
 ON CONFLICT ("name") DO NOTHING;
 
-INSERT INTO "MenuItem" ("categoryId", "name", "description", "price", "sortOrder")
-SELECT id, 'Royal Breakfast', 'Eggs, fresh fruit, pastry, and Ethiopian coffee.', 650, 1
+INSERT INTO "MenuItem" ("categoryId", "name", "description", "price", "sortOrder", "updatedAt")
+SELECT id, 'Royal Breakfast', 'Eggs, fresh fruit, pastry, and Ethiopian coffee.', 650, 1, CURRENT_TIMESTAMP
 FROM "MenuCategory" WHERE name = 'Breakfast'
 AND NOT EXISTS (SELECT 1 FROM "MenuItem" WHERE name = 'Royal Breakfast');
-INSERT INTO "MenuItem" ("categoryId", "name", "description", "price", "sortOrder")
-SELECT id, 'Tibs Royale', 'Tender beef tibs with injera and seasonal salad.', 1200, 1
+INSERT INTO "MenuItem" ("categoryId", "name", "description", "price", "sortOrder", "updatedAt")
+SELECT id, 'Tibs Royale', 'Tender beef tibs with injera and seasonal salad.', 1200, 1, CURRENT_TIMESTAMP
 FROM "MenuCategory" WHERE name = 'Main Courses'
 AND NOT EXISTS (SELECT 1 FROM "MenuItem" WHERE name = 'Tibs Royale');
-INSERT INTO "MenuItem" ("categoryId", "name", "description", "price", "sortOrder")
-SELECT id, 'Fresh Juice', 'Seasonal fruit juice served chilled.', 280, 1
+INSERT INTO "MenuItem" ("categoryId", "name", "description", "price", "sortOrder", "updatedAt")
+SELECT id, 'Fresh Juice', 'Seasonal fruit juice served chilled.', 280, 1, CURRENT_TIMESTAMP
 FROM "MenuCategory" WHERE name = 'Beverages'
 AND NOT EXISTS (SELECT 1 FROM "MenuItem" WHERE name = 'Fresh Juice');
