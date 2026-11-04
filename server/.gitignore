@@ -3,6 +3,7 @@ dist/
 .env
 .DS_Store
 .env.example
+!.env.example
 # but do NOT ignore the server folder itself
 !server/
 server/node_modules/
