@@ -8,4 +8,10 @@ export const diningReservationsController = {
   async mine(req, res) {
     res.json({ success: true, data: await diningReservationsService.listForGuest(req.user.id) });
   },
+  async availability(req, res) {
+    res.json({ success: true, data: await diningReservationsService.availability(req.query) });
+  },
+  async cancel(req, res) {
+    res.json({ success: true, data: await diningReservationsService.cancel(req.params.id, req.user.id) });
+  },
 };

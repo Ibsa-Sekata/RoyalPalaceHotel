@@ -31,9 +31,11 @@ import Settings from "./pages/admin/Settings.jsx";
 import Users from "./pages/admin/Users.jsx";
 import Profile from "./pages/admin/Profile.jsx";
 import ContentManagement from "./pages/admin/ContentManagement.jsx";
+import KitchenDashboard from "./pages/admin/KitchenDashboard.jsx";
 
 import MyBookings from "./pages/guest/MyBookings.jsx";
 import MyProfile from "./pages/guest/MyProfile.jsx";
+import FoodOrdering from "./pages/guest/FoodOrdering.jsx";
 
 import NotFound from "./pages/NotFound.jsx";
 
@@ -76,6 +78,7 @@ export default function App() {
         <Route path="users" element={<Users />} />
         <Route path="profile" element={<Profile />} />
         <Route path="content" element={<ContentManagement />} />
+        <Route path="kitchen" element={<KitchenDashboard />} />
       </Route>
 
       <Route
@@ -98,6 +101,12 @@ export default function App() {
         }
       >
         <Route index element={<MyProfile />} />
+      </Route>
+      <Route
+        path="/food-ordering"
+        element={<ProtectedRoute roles={["GUEST"]}><GuestLayout /></ProtectedRoute>}
+      >
+        <Route index element={<FoodOrdering />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
-import { Crown, CalendarDays, CircleUserRound, LogOut, BedDouble, Utensils } from "lucide-react";
+import { Crown, CalendarDays, CircleUserRound, LogOut, BedDouble, Utensils, ShoppingBag } from "lucide-react";
 import { useAuth } from "../../context/useAuth.js";
 
 export default function GuestLayout() {
@@ -66,6 +66,12 @@ export default function GuestLayout() {
             display: "flex", alignItems: "center", gap: 6,
           }}>
             <Utensils size={15}/> Browse dining
+          </Link>
+          <Link to="/food-ordering" style={{
+            fontSize: 12, color: "#3e4146", textDecoration: "none",
+            display: "flex", alignItems: "center", gap: 6,
+          }}>
+            <ShoppingBag size={15}/> Order food
           </Link>
           <span style={{ fontSize: 11, color: "#8892a0", marginLeft: 8 }}>
             {user?.fullName}

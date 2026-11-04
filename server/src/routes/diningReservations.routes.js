@@ -7,6 +7,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 const router = Router();
 router.use(authenticate, requireRole("GUEST"));
 router.post("/", asyncHandler(diningReservationsController.create));
+router.get("/availability", asyncHandler(diningReservationsController.availability));
 router.get("/mine", asyncHandler(diningReservationsController.mine));
+router.post("/:id/cancel", asyncHandler(diningReservationsController.cancel));
 
 export default router;

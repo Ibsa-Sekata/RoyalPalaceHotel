@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { CalendarDays, BedDouble, Users, Plus, X, Utensils } from "lucide-react";
 import { myBookingsApi } from "../../api/myBookingsApi.js";
+import { diningReservationsApi } from "../../api/diningReservationsApi.js";
 import { useAuth } from "../../context/useAuth.js";
 
 export default function MyBookings() {
   const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
+  const [diningReservations, setDiningReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(null);
@@ -16,10 +18,22 @@ export default function MyBookings() {
   const load = async () => {
     setLoading(true); setError("");
     try {
-      const res = await myBookingsApi.list();
+      const [res, diningRes] = await Promise.all([myBookingsApi.list(), diningReservationsApi.mine()]);
       setBookings(res.data || []);
+      setDiningReservations(diningRes.data || []);
     } catch (e) { setError(e.message); }
     finally { setLoading(false); }
+  };
+
+  const cancelDiningReservation = async (id) => {
+    if (!window.confirm("Cancel this dining reservation?")) return;
+    setBusy(`dining-${id}`);
+    try {
+      await diningReservationsApi.cancel(id);
+      setFlash("Dining reservation cancelled");
+      await load();
+    } catch (e) { setError(e.message); }
+    finally { setBusy(null); }
   };
 
   useEffect(() => { load(); }, []);
@@ -130,6 +144,30 @@ export default function MyBookings() {
           <Utensils size={14}/> Browse dining
         </Link>
       </div>
+
+      {diningReservations.length > 0 && (
+        <section style={{ marginBottom: 28 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: "#20242a" }}>Dining reservations</h2>
+          <div style={{ display: "grid", gap: 12 }}>
+            {diningReservations.map((reservation) => (
+              <div key={reservation.id} style={{ background: "#fff", border: "1px solid #eef0f3", borderRadius: 14, padding: "16px 20px", display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center" }}>
+                <div>
+                  <b>{reservation.restaurantName}</b>
+                  <div style={{ fontSize: 12, color: "#8892a0", marginTop: 5 }}>
+                    {new Date(reservation.reservationStart).toLocaleString()} · {reservation.guests} guests · Table {reservation.tableNumber || "assigned"}
+                  </div>
+                  <div style={{ fontSize: 11, color: "#a17b36", marginTop: 4 }}>{reservation.confirmationNumber} · {reservation.status}</div>
+                </div>
+                {reservation.status !== "CANCELLED" && new Date(reservation.reservationStart) > new Date() && (
+                  <button className="btn btn-small btn-light" disabled={busy === `dining-${reservation.id}`} onClick={() => cancelDiningReservation(reservation.id)}>
+                    {busy === `dining-${reservation.id}` ? "Cancelling..." : "Cancel"}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {loading ? (
         <p style={{ textAlign: "center", padding: 60, color: "#8892a0" }}>Loading your bookings...</p>

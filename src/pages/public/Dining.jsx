@@ -16,6 +16,9 @@ export default function Dining() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [confirmation, setConfirmation] = useState(null);
+  const [availableTables, setAvailableTables] = useState([]);
+  const [availabilityChecked, setAvailabilityChecked] = useState(false);
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   useEffect(() => {
@@ -41,6 +44,30 @@ export default function Dining() {
       setError(requestError.message);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const checkAvailability = async () => {
+    setError("");
+    if (!form.restaurantName || !form.date || !form.time) {
+      setError("Choose a restaurant, date, and time first.");
+      return;
+    }
+    setCheckingAvailability(true);
+    setAvailabilityChecked(false);
+    try {
+      const response = await diningReservationsApi.availability({
+        restaurantName: form.restaurantName,
+        date: form.date,
+        time: form.time,
+      });
+      setAvailableTables(response.data || []);
+      setAvailabilityChecked(true);
+      setForm((current) => ({ ...current, tableNumber: current.tableNumber && response.data.includes(current.tableNumber) ? current.tableNumber : "" }));
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setCheckingAvailability(false);
     }
   };
 
@@ -114,10 +141,15 @@ export default function Dining() {
                     <label>Preferred table
                       <select value={form.tableNumber} onChange={update("tableNumber")}>
                         <option value="">Any available table</option>
-                        {tables.map((table) => <option key={table} value={table}>{table}</option>)}
+                        {(availableTables.length ? availableTables : tables).map((table) => <option key={table} value={table}>{table}</option>)}
                       </select>
                     </label>
                   </div>
+                  <button type="button" className="btn btn-light" onClick={checkAvailability} disabled={checkingAvailability}>
+                    {checkingAvailability ? "Checking tables..." : "Check available tables"}
+                  </button>
+                  {availabilityChecked && availableTables.length === 0 && <p style={{ color: "#c05d5d", fontSize: 12 }}>No tables are currently available for this time.</p>}
+                  {availabilityChecked && availableTables.length > 0 && <p style={{ color: "#39845a", fontSize: 12 }}>{availableTables.length} table(s) available.</p>}
                   <label>Special requests (optional)
                     <textarea rows="3" value={form.specialRequests} onChange={update("specialRequests")} placeholder="Dietary needs, celebration, or seating requests" />
                   </label>

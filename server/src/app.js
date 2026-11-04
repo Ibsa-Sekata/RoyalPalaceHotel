@@ -18,10 +18,15 @@ import reportsRoutes from "./routes/reports.routes.js";
 import usersRoutes from "./routes/users.routes.js";
 import mediaRoutes from "./routes/media.routes.js";
 import diningReservationsRoutes from "./routes/diningReservations.routes.js";
+import foodOrdersRoutes from "./routes/foodOrders.routes.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 import { notFound } from "./middleware/notFound.middleware.js";
 
 export const prisma = new PrismaClient();
+export let socketIO = null;
+export function setSocketIO(io) {
+  socketIO = io;
+}
 
 const app = express();
 app.use(helmet());
@@ -48,6 +53,7 @@ app.use("/api/v1/reports", reportsRoutes);
 app.use("/api/v1/users", usersRoutes);
 app.use("/api/v1/media", mediaRoutes);
 app.use("/api/v1/dining-reservations", diningReservationsRoutes);
+app.use("/api/v1/food-orders", foodOrdersRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
